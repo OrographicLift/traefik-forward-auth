@@ -50,6 +50,8 @@ type Config struct {
 	// Since traefik-forward-auth is a stateless application, fields not specified here cannot be referenced from
 	// `rules.<name>.auth-rule` or `headers.<name>.source`.
 	InfoFields []string `mapstructure:"info-fields"`
+	// TokenLeeway defines the leeway in seconds to allow for clock drift when validating tokens
+	TokenLeeway int `mapstructure:"token-leeway"`
 
 	// Provider selects provider to use.
 	// 	Allowed values: "google", "oidc", "generic-oauth"
@@ -88,6 +90,7 @@ func init() {
 	viper.SetDefault("user-id-path", "email")
 	viper.SetDefault("port", "4181")
 	viper.SetDefault("info-fields", "email")
+	viper.SetDefault("token-leeway", 1)
 
 	viper.SetDefault("provider", "google")
 	viper.SetDefault("providers.google.prompt", "select_account")

@@ -31,6 +31,9 @@ func initConfigs(args []string) (*tfa.Config, *logrus.Logger) {
 func serve() {
 	cfg, log := initConfigs(os.Args[1:])
 
+	// Initialize token config
+	token.Config.TokenLeeway = cfg.TokenLeeway
+
 	// Build server
 	server := tfa.NewServer()
 
@@ -52,6 +55,9 @@ func sign() {
 	}
 
 	cfg, _ := initConfigs(os.Args[4:])
+
+	// Initialize token config
+	token.Config.TokenLeeway = cfg.TokenLeeway
 
 	userinfoStr := os.Args[2]
 	ttlStr := os.Args[3]

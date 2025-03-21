@@ -3,9 +3,16 @@ package token
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/Jeffail/gabs/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
+
+// Config is used to access the global configuration
+var Config struct {
+	TokenLeeway int
+}
 
 const userinfoKey = "tfa"
 
@@ -45,13 +52,22 @@ func SignToken(object any, expiryUnixSeconds int64, secret []byte) (string, erro
 }
 
 func VerifyToken(token string, secret []byte) (any, error) {
-	tok, err := jwt.Parse(token, func(token *jwt.Token) (any, error) { return secret, nil })
+
+	// Create parser with leeway for clock drift
+	parser := jwt.NewParser(jwt.WithLeeway(time.Duration(Config.TokenLeeway) * time.Second))
+
+	// Parse and validate token
+	tok, err := parser.Parse(token, func(token *jwt.Token) (any, error) {
+		return secret, nil
+	})
+
 	if err != nil {
 		return "", err
 	}
 	if !tok.Valid { // should be unreachable, but check the field just in case
 		return "", errors.New("invalid token")
 	}
+
 	mc := tok.Claims.(jwt.MapClaims)
 	object, ok := mc[userinfoKey]
 	if !ok {
